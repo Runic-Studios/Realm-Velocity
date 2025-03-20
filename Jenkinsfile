@@ -4,6 +4,8 @@ pipeline {
     environment {
         DEPLOYMENT_REPO = 'git@github.com:Runic-Studios/Realm-Deployment.git'
         DISCORD_WEBHOOK = credentials('discord-webhook')
+        REGISTRY = 'registry.runicrealms.com'
+        IMAGE_NAME = 'realm-velocity'
     }
 
     stages {
@@ -35,6 +37,26 @@ pipeline {
                 }
             }
         }
+        stage('Build and Push Docker Image') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'docker-registry-credentials', usernameVariable: 'REGISTRY_USER', passwordVariable: 'REGISTRY_PASSWORD')]) {
+                        sh """
+                            echo "Logging into registry..."
+                            echo $REGISTRY_PASSWORD | docker login ${REGISTRY} -u $REGISTRY_USER --password-stdin
+
+                            echo "Building Docker image..."
+                            docker build -t ${REGISTRY}/${IMAGE_NAME}:${env.GIT_COMMIT} .
+
+                            echo "Pushing Docker image..."
+                            docker push ${REGISTRY}/${IMAGE_NAME}:${env.GIT_COMMIT}
+
+                            echo "Image pushed: ${REGISTRY}/${IMAGE_NAME}:${env.GIT_COMMIT}"
+                        """
+                    }
+                }
+            }
+        }
         stage('Checkout Realm-Deployment') {
             steps {
                 script {
@@ -55,7 +77,7 @@ pipeline {
             steps {
                 script {
                    sh """
-                     sed -i -E '/- name: harbor.runicrealms.com\\/realm-velocity/{n;s|newTag: .*|newTag: \\"${env.GIT_COMMIT}\\"|;}' Realm-Deployment/base/kustomization.yaml
+                     sed -i -E '/- name: registry.runicrealms.com\\/realm-velocity/{n;s|newTag: .*|newTag: \\"${env.GIT_COMMIT}\\"|;}' Realm-Deployment/base/kustomization.yaml
                    """
                }
             }
