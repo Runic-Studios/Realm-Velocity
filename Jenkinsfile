@@ -40,6 +40,7 @@ pipeline {
                 script {
                     withCredentials([sshUserPrivateKey(credentialsId: 'github-ssh', keyFileVariable: 'SSH_KEY')]) {
                         sh """
+                          rm -rf Realm-Deployment
                           export GIT_SSH_COMMAND='ssh -i $SSH_KEY -o StrictHostKeyChecking=no'
                           git clone --branch ${env.DEPLOYMENT_BRANCH} ${DEPLOYMENT_REPO} Realm-Deployment
                         """
@@ -72,6 +73,7 @@ pipeline {
                               git add base/images.yaml
                               git commit -m "Update Realm-Velocity image to ${env.GIT_COMMIT} for dev"
                               git push origin dev
+                              rm -rf Realm-Deployment
                             """
                         }
                     }
