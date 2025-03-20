@@ -55,7 +55,7 @@ pipeline {
             steps {
                 script {
                    sh """
-                     sed -i -E '/- name: harbor.runicrealms.com\\/realm-velocity/{n;s|newTag: .*|newTag: \\"${env.GIT_COMMIT}\\"|;}' Realm-Deployment/env/realm-dev/kustomization.yaml
+                     sed -i -E '/- name: harbor.runicrealms.com\\/realm-velocity/{n;s|newTag: .*|newTag: \\"${env.GIT_COMMIT}\\"|;}' Realm-Deployment/base/kustomization.yaml
                    """
                }
             }
