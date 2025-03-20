@@ -10,13 +10,12 @@ pipeline {
     environment {
         DEPLOYMENT_REPO = 'git@github.com:Runic-Studios/Realm-Deployment.git'
         IMAGE_NAME = 'realm-velocity'
-        PROJECT = 'Realm Velocity'
     }
 
     stages {
         stage('Send Discord Notification (Build Start)') {
             steps {
-                discordNotifyStart(PROJECT, env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT)
+                discordNotifyStart('Realm Velocity', env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT)
             }
         }
         stage('Determine Environment') {
@@ -91,10 +90,10 @@ pipeline {
     }
     post {
         success {
-            discordNotifySuccess(PROJECT, env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT)
+            discordNotifySuccess('Realm Velocity', env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT)
         }
         failure {
-            discordNotifyFail(PROJECT, env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT)
+            discordNotifyFail('Realm Velocity', env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT)
         }
     }
 }
