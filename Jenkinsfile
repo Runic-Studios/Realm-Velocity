@@ -53,7 +53,7 @@ pipeline {
             }
             steps {
                 script {
-                    sh "sed -i 's|newTag: .*|newTag: \"${env.GIT_COMMIT}\"|' Realm-Deployment/base/image-overlays.yaml"
+                    sh "sed -i 's|newTag: .*|newTag: \"${env.GIT_COMMIT}\"|' Realm-Deployment/base/images.yaml"
                 }
             }
         }
@@ -69,7 +69,7 @@ pipeline {
                               export GIT_SSH_COMMAND='ssh -i $SSH_KEY -o StrictHostKeyChecking=no'
                               git config --global user.email "runicrealms.mc@gmail.com"
                               git config --global user.name "Runic Realms Jenkins"
-                              git add base/image-overlays.yaml
+                              git add base/images.yaml
                               git commit -m "Update Realm-Velocity image to ${env.GIT_COMMIT} for dev"
                               git push origin dev
                             """
