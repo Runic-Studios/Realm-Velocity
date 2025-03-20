@@ -19,14 +19,18 @@ pipeline {
         stage('Determine Environment') {
             steps {
                 script {
-                    if (env.GIT_BRANCH == 'origin/dev') {
+                    def branchName = env.GIT_BRANCH.replaceAll(/^origin\//, '').replaceAll(/^refs\/heads\//, '')
+
+                    echo "Using normalized branch name: ${branchName}"
+
+                    if (branchName == 'dev') {
                         env.DEPLOYMENT_BRANCH = 'dev'
                         env.RUN_MAIN_DEPLOY = 'false'
-                    } else if (env.GIT_BRANCH == 'origin/main') {
+                    } else if (branchName == 'main') {
                         env.DEPLOYMENT_BRANCH = 'main'
                         env.RUN_MAIN_DEPLOY = 'true'
                     } else {
-                        error "Unsupported branch: ${env.GIT_BRANCH}"
+                        error "Unsupported branch: ${branchName}"
                     }
                 }
             }
