@@ -72,7 +72,7 @@ pipeline {
                               export GIT_SSH_COMMAND='ssh -i $SSH_KEY -o StrictHostKeyChecking=no'
                               git config --global user.email "runicrealms.mc@gmail.com"
                               git config --global user.name "Runic Realms Jenkins"
-                              git add base/images.yaml
+                              git add base/kustomization.yaml
                               git commit -m "Update Realm-Velocity image to ${env.GIT_COMMIT} for dev"
                               git push origin dev
                               rm -rf Realm-Deployment
