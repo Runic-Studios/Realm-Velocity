@@ -1,7 +1,11 @@
 @Library('Jenkins-Shared-Lib') _
 
 pipeline {
-    agent jenkinsAgent()
+    agent {
+        kubernetes {
+            yaml jenkinsAgent()
+        }
+    }
 
     environment {
         DEPLOYMENT_REPO = 'git@github.com:Runic-Studios/Realm-Deployment.git'
