@@ -3,9 +3,19 @@ pipeline {
 
     environment {
         DEPLOYMENT_REPO = 'git@github.com:Runic-Studios/Realm-Deployment.git'
+        DISCORD_WEBHOOK = credentials('discord-webhook')
     }
 
     stages {
+        stage('Send Discord Notification (Build Start)') {
+            steps {
+                discordSend webhookURL: env.DISCORD_WEBHOOK,
+                            description: "Build started for ${env.GIT_BRANCH} at commit ${env.GIT_COMMIT}",
+                            footer: "Realm-Velocity CI",
+                            title: "Jenkins Build Started 🚀",
+                            color: "#FFFF00"
+            }
+        }
         stage('Determine Environment') {
             steps {
                 script {
@@ -68,6 +78,22 @@ pipeline {
                     """
                 }
             }
+        }
+    }
+    post {
+        success {
+            discordSend webhookURL: env.DISCORD_WEBHOOK,
+                        description: "Build **SUCCESSFUL** for ${env.GIT_BRANCH} at commit ${env.GIT_COMMIT}",
+                        footer: "Realm-Velocity CI",
+                        title: "Jenkins Build Passed ✅",
+                        color: "#00FF00"
+        }
+        failure {
+            discordSend webhookURL: env.DISCORD_WEBHOOK,
+                        description: "Build **FAILED** for ${env.GIT_BRANCH} at commit ${env.GIT_COMMIT}",
+                        footer: "Realm-Velocity CI",
+                        title: "Jenkins Build Failed ❌",
+                        color: "#FF0000"
         }
     }
 }
