@@ -38,7 +38,12 @@ pipeline {
         stage('Checkout Realm-Deployment') {
             steps {
                 script {
-                    sh "git clone --branch ${env.DEPLOYMENT_BRANCH} ${DEPLOYMENT_REPO} Realm-Deployment"
+                    withCredentials([sshUserPrivateKey(credentialsId: 'github-ssh', keyFileVariable: 'SSH_KEY')]) {
+                        sh """
+                          export GIT_SSH_COMMAND='ssh -i $SSH_KEY -o StrictHostKeyChecking=no'
+                          git clone --branch ${env.DEPLOYMENT_BRANCH} ${DEPLOYMENT_REPO} Realm-Deployment
+                        """
+                    }
                 }
             }
         }
@@ -59,13 +64,16 @@ pipeline {
             steps {
                 script {
                     dir('Realm-Deployment') {
-                        sh """
-                          git config --global user.email "runicrealms.mc@gmail.com"
-                          git config --global user.name "Runic Realms Jenkins"
-                          git add base/image-overlays.yaml
-                          git commit -m "Update Realm-Velocity image to ${env.GIT_COMMIT} for dev"
-                          git push origin dev
-                        """
+                        withCredentials([sshUserPrivateKey(credentialsId: 'github-ssh', keyFileVariable: 'SSH_KEY')]) {
+                            sh """
+                              export GIT_SSH_COMMAND='ssh -i $SSH_KEY -o StrictHostKeyChecking=no'
+                              git config --global user.email "runicrealms.mc@gmail.com"
+                              git config --global user.name "Runic Realms Jenkins"
+                              git add base/image-overlays.yaml
+                              git commit -m "Update Realm-Velocity image to ${env.GIT_COMMIT} for dev"
+                              git push origin dev
+                            """
+                        }
                     }
                 }
             }
@@ -76,10 +84,14 @@ pipeline {
             }
             steps {
                 script {
-                    sh """
-                      gh pr create --base main --head dev --title 'Promote latest Realm-Velocity image to production' \
-                        --body 'This PR promotes the latest tested Realm-Velocity build from dev to production. This was triggered because of a push to Realm-Velocity main.'
-                    """
+                    withCredentials([sshUserPrivateKey(credentialsId: 'github-ssh', keyFileVariable: 'SSH_KEY')]) {
+                        sh """
+                          export GIT_SSH_COMMAND='ssh -i $SSH_KEY -o StrictHostKeyChecking=no'
+                          gh auth setup-git
+                          gh pr create --base main --head dev --title 'Promote latest Realm-Velocity image to production' \
+                            --body 'This PR promotes the latest tested Realm-Velocity build from dev to production. This was triggered because of a push to Realm-Velocity main.'
+                        """
+                    }
                 }
             }
         }
