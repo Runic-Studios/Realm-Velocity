@@ -13,7 +13,7 @@ pipeline {
                             description: "Build started for ${env.GIT_BRANCH} at commit ${env.GIT_COMMIT}",
                             footer: "Realm-Velocity CI",
                             title: "Jenkins Build Started 🚀",
-                            color: "#FFFF00"
+                            result: "SUCCESS"
             }
         }
         stage('Determine Environment') {
@@ -90,14 +90,14 @@ pipeline {
                         description: "Build **SUCCESSFUL** for ${env.GIT_BRANCH} at commit ${env.GIT_COMMIT}",
                         footer: "Realm-Velocity CI",
                         title: "Jenkins Build Passed ✅",
-                        color: "#00FF00"
+                        result: "SUCCESS"
         }
         failure {
             discordSend webhookURL: env.DISCORD_WEBHOOK,
                         description: "Build **FAILED** for ${env.GIT_BRANCH} at commit ${env.GIT_COMMIT}",
                         footer: "Realm-Velocity CI",
                         title: "Jenkins Build Failed ❌",
-                        color: "#FF0000"
+                        result: "FAILURE"
         }
     }
 }
