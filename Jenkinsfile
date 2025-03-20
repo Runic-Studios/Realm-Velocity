@@ -54,8 +54,10 @@ pipeline {
             }
             steps {
                 script {
-                    sh "sed -i 's|newTag: .*|newTag: \"${env.GIT_COMMIT}\"|' Realm-Deployment/base/images.yaml"
-                }
+                   sh """
+                     sed -i -E '/- name: harbor.runicrealms.com\\/realm-velocity/{n;s|newTag: .*|newTag: \\"${env.GIT_COMMIT}\\"|;}' Realm-Deployment/env/realm-dev/kustomization.yaml
+                   """
+               }
             }
         }
         stage('Commit and Push Changes (Dev Only)') {
