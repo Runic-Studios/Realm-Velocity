@@ -3,7 +3,7 @@
 pipeline {
     agent {
         kubernetes {
-            yaml jenkinsAgent()
+            yaml jenkinsAgent("registry.runicrealms.com")
         }
     }
 
@@ -39,7 +39,7 @@ pipeline {
         }
         stage('Build and Push Docker Image') {
             steps {
-                dockerBuildPush(IMAGE_NAME, env.GIT_COMMIT)
+                dockerBuildPush(IMAGE_NAME, env.GIT_COMMIT, "registry.runicrealms.com")
             }
         }
         stage('Update Deployment (Dev Only)') {
