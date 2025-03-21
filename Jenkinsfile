@@ -3,7 +3,7 @@
 pipeline {
     agent {
         kubernetes {
-            yaml jenkinsAgent(this)
+            yaml jenkinsAgent()
         }
     }
 
