@@ -3,7 +3,7 @@
 pipeline {
     agent {
         kubernetes {
-            yaml jenkinsAgent()
+            yaml jenkinsAgent(this)
         }
     }
 
@@ -90,10 +90,10 @@ pipeline {
     }
     post {
         success {
-            discordNotifySuccess('Realm Velocity', env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT)
+//             discordNotifySuccess('Realm Velocity', env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT)
         }
         failure {
-            discordNotifyFail('Realm Velocity', env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT)
+//             discordNotifyFail('Realm Velocity', env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT)
         }
     }
 }
