@@ -40,7 +40,7 @@ pipeline {
         stage('Build and Push Docker Image') {
             steps {
                 container('jenkins-agent') {
-                    dockerBuildPush(IMAGE_NAME, env.GIT_COMMIT, "registry.runicrealms.com")
+                    dockerBuildPush(IMAGE_NAME, env.GIT_COMMIT, "registry.runicrealms.com", "build")
                 }
             }
         }
@@ -48,7 +48,7 @@ pipeline {
             when { expression { return env.RUN_MAIN_DEPLOY == 'false' } }
             steps {
                 container('jenkins-agent') {
-                    updateDeployment(env.DEPLOYMENT_BRANCH, IMAGE_NAME, env.GIT_COMMIT, "registry.runicrealms.com")
+                    updateDeployment(env.DEPLOYMENT_BRANCH, IMAGE_NAME, env.GIT_COMMIT, "registry.runicrealms.com", "build")
                 }
             }
         }
