@@ -48,7 +48,7 @@ pipeline {
             when { expression { return env.RUN_MAIN_DEPLOY == 'false' } }
             steps {
                 container('jenkins-agent') {
-                    updateDeployment(env.DEPLOYMENT_BRANCH, IMAGE_NAME, env.GIT_COMMIT)
+                    updateDeployment(env.DEPLOYMENT_BRANCH, IMAGE_NAME, env.GIT_COMMIT, "registry.runicrealms.com")
                 }
             }
         }
