@@ -39,34 +39,16 @@ pipeline {
         }
         stage('Build and Push Docker Image') {
             steps {
-                dockerBuildPush(IMAGE_NAME, env.GIT_COMMIT, "registry.runicrealms.com")
+                container('jenkins-agent') {
+                    dockerBuildPush(IMAGE_NAME, env.GIT_COMMIT, "registry.runicrealms.com")
+                }
             }
         }
         stage('Update Deployment (Dev Only)') {
             when { expression { return env.RUN_MAIN_DEPLOY == 'false' } }
             steps {
-                updateDeployment(env.DEPLOYMENT_BRANCH, IMAGE_NAME, env.GIT_COMMIT)
-            }
-        }
-        stage('Commit and Push Changes (Dev Only)') {
-            when {
-                expression { return env.RUN_MAIN_DEPLOY == 'false' }
-            }
-            steps {
-                script {
-                    dir('Realm-Deployment') {
-                        withCredentials([sshUserPrivateKey(credentialsId: 'github-ssh', keyFileVariable: 'SSH_KEY')]) {
-                            sh """
-                              export GIT_SSH_COMMAND='ssh -i $SSH_KEY -o StrictHostKeyChecking=no'
-                              git config --global user.email "runicrealms.mc@gmail.com"
-                              git config --global user.name "Runic Realms Jenkins"
-                              git add base/kustomization.yaml
-                              git commit -m "Update Realm-Velocity image to ${env.GIT_COMMIT} for dev"
-                              git push origin dev
-                              rm -rf Realm-Deployment
-                            """
-                        }
-                    }
+                container('jenkins-agent') {
+                    updateDeployment(env.DEPLOYMENT_BRANCH, IMAGE_NAME, env.GIT_COMMIT)
                 }
             }
         }
