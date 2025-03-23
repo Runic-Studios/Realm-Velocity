@@ -45,12 +45,11 @@ pipeline {
                         manifest.artifacts.each { artifact ->
                             def parts = artifact.name.tokenize('/')
                             def registry = parts[0]
-                            def namespace = parts[1]
-                            def repo = parts[2]
-                            def artifactName = parts[3]
+                            def registryProject = parts[1]
+                            def artifactName = parts[2]
 
-                            echo "Pulling ${artifactName} from ${registry}/${namespace}/${repo} with tag ${artifact.newTag}"
-                            orasPull(artifactName, artifact.newTag, repo, registry, namespace)
+                            echo "Pulling ${artifactName} from ${registry}/${registryProject} with tag ${artifact.newTag}"
+                            orasPull(artifactName, artifact.newTag, 'plugins', registry, registryProject)
                         }
                     }
                 }
