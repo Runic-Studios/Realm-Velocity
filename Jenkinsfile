@@ -1,99 +1,89 @@
+@Library('Jenkins-Shared-Lib') _
+
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            yaml jenkinsAgent("registry.runicrealms.com")
+        }
+    }
 
     environment {
         DEPLOYMENT_REPO = 'git@github.com:Runic-Studios/Realm-Deployment.git'
-        DISCORD_WEBHOOK = credentials('discord-webhook')
+        IMAGE_NAME = 'realm-velocity'
     }
 
     stages {
         stage('Send Discord Notification (Build Start)') {
             steps {
-                discordSend webhookURL: env.DISCORD_WEBHOOK,
-                            description: "Build started for ${env.GIT_BRANCH} at commit ${env.GIT_COMMIT}",
-                            footer: "Realm-Velocity CI",
-                            title: "Jenkins Build Started 🚀",
-                            color: "#FFFF00"
+                discordNotifyStart('Realm Velocity', env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT.take(7))
             }
         }
         stage('Determine Environment') {
             steps {
                 script {
-                    if (env.GIT_BRANCH == 'origin/dev') {
-                        env.DEPLOYMENT_BRANCH = 'dev'
+                    def branchName = env.GIT_BRANCH.replaceAll(/^origin\//, '').replaceAll(/^refs\/heads\//, '')
+
+                    echo "Using normalized branch name: ${branchName}"
+
+                    if (branchName == 'dev') {
                         env.RUN_MAIN_DEPLOY = 'false'
-                    } else if (env.GIT_BRANCH == 'origin/main') {
-                        env.DEPLOYMENT_BRANCH = 'main'
+                    } else if (branchName == 'main') {
                         env.RUN_MAIN_DEPLOY = 'true'
                     } else {
-                        error "Unsupported branch: ${env.GIT_BRANCH}"
+                        error "Unsupported branch: ${branchName}"
                     }
                 }
             }
         }
-        stage('Checkout Realm-Deployment') {
+        stage('Pull Plugin Artifacts') {
             steps {
-                script {
-                    sh "git clone --branch ${env.DEPLOYMENT_BRANCH} ${DEPLOYMENT_REPO} Realm-Deployment"
-                }
-            }
-        }
-        stage('Update Image Reference (Dev Only)') {
-            when {
-                expression { return env.RUN_MAIN_DEPLOY == 'false' }
-            }
-            steps {
-                script {
-                    sh "sed -i 's|newTag: .*|newTag: \"${env.GIT_COMMIT}\"|' Realm-Deployment/base/image-overlays.yaml"
-                }
-            }
-        }
-        stage('Commit and Push Changes (Dev Only)') {
-            when {
-                expression { return env.RUN_MAIN_DEPLOY == 'false' }
-            }
-            steps {
-                script {
-                    dir('Realm-Deployment') {
-                        sh """
-                          git config --global user.email "runicrealms.mc@gmail.com"
-                          git config --global user.name "Runic Realms Jenkins"
-                          git add base/image-overlays.yaml
-                          git commit -m "Update Realm-Velocity image to ${env.GIT_COMMIT} for dev"
-                          git push origin dev
-                        """
+                container('jenkins-agent') {
+                    script {
+                        def manifest = readYaml file: 'plugin-manifest.yaml'
+                        manifest.artifacts.each { artifact ->
+                            def parts = artifact.name.tokenize('/')
+                            def registry = parts[0]
+                            def registryProject = parts[1]
+                            def artifactName = parts[2]
+
+                            echo "Pulling ${artifactName} from ${registry}/${registryProject} with tag ${artifact.newTag}"
+                            orasPull(artifactName, artifact.newTag, 'plugins', registry, registryProject)
+                        }
                     }
                 }
             }
         }
-        stage('Create PR to Promote Dev to Main (Main Only)') {
+        stage('Build and Push Docker Image') {
+            steps {
+                container('jenkins-agent') {
+                    dockerBuildPush(IMAGE_NAME, env.GIT_COMMIT.take(7), "registry.runicrealms.com", "build")
+                }
+            }
+        }
+        stage('Update Deployment') {
+            steps {
+                container('jenkins-agent') {
+                    updateManifest('dev', 'Realm-Deployment', 'base/kustomization.yaml', IMAGE_NAME, env.GIT_COMMIT.take(7), "registry.runicrealms.com", "build")
+                }
+            }
+        }
+        stage('Create PR to Promote Realm-Deployment Dev to Main (Prod Only)') {
             when {
                 expression { return env.RUN_MAIN_DEPLOY == 'true' }
             }
             steps {
-                script {
-                    sh """
-                      gh pr create --base main --head dev --title 'Promote latest Realm-Velocity image to production' \
-                        --body 'This PR promotes the latest tested Realm-Velocity build from dev to production. This was triggered because of a push to Realm-Velocity main.'
-                    """
+                container('jenkins-agent') {
+                    createPR('Realm-Velocity', 'Realm-Deployment', 'dev', 'main')
                 }
             }
         }
     }
     post {
         success {
-            discordSend webhookURL: env.DISCORD_WEBHOOK,
-                        description: "Build **SUCCESSFUL** for ${env.GIT_BRANCH} at commit ${env.GIT_COMMIT}",
-                        footer: "Realm-Velocity CI",
-                        title: "Jenkins Build Passed ✅",
-                        color: "#00FF00"
+            discordNotifySuccess('Realm Velocity', env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT.take(7))
         }
         failure {
-            discordSend webhookURL: env.DISCORD_WEBHOOK,
-                        description: "Build **FAILED** for ${env.GIT_BRANCH} at commit ${env.GIT_COMMIT}",
-                        footer: "Realm-Velocity CI",
-                        title: "Jenkins Build Failed ❌",
-                        color: "#FF0000"
+            discordNotifyFail('Realm Velocity', env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT.take(7))
         }
     }
 }
