@@ -7,7 +7,7 @@ echo "=== ENTRYPOINT: Starting up Realm-Velocity container ==="
 CONFIG_DIR="/config"
 TARGET_DIR="/opt/velocity"
 
-# 1) Copy config files if the directory exists
+# Copy config files if the directory exists
 if [ -d "$CONFIG_DIR" ]; then
     if [ -z "$(ls -A "$CONFIG_DIR")" ]; then
         echo "WARNING: Config directory exists but is empty: $CONFIG_DIR"
@@ -36,18 +36,6 @@ else
     echo "WARNING: Config directory $CONFIG_DIR does not exist!"
 fi
 
-# 2) Download the latest plugins from Harbor
-if [ -n "$PLUGIN_LIST" ]; then
-    echo "Downloading plugins from Harbor..."
-    mkdir -p /opt/velocity/plugins
-    for pluginURL in $PLUGIN_LIST; do
-        echo " - Downloading plugin from $pluginURL"
-        curl -fSL "$pluginURL" -o "/opt/velocity/plugins/$(basename "$pluginURL")"
-    done
-else
-    echo "No plugins to download. (PLUGIN_LIST is empty)"
-fi
-
-# 3) Finally, launch Velocity
+# Finally, launch Velocity
 echo "=== ENTRYPOINT: Starting Velocity JAR ==="
 exec java -jar /opt/velocity/velocity.jar
