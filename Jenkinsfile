@@ -27,10 +27,8 @@ pipeline {
 
                     if (branchName == 'dev') {
                         env.RUN_MAIN_DEPLOY = 'false'
-                        env.ARTIFACT_TAG = 'latest-dev'
                     } else if (branchName == 'main') {
                         env.RUN_MAIN_DEPLOY = 'true'
-                        env.ARTIFACT_TAG = 'latest'
                     } else {
                         error "Unsupported branch: ${branchName}"
                     }
