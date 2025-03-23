@@ -40,7 +40,19 @@ pipeline {
         stage('Pull Plugin Artifacts') {
             steps {
                 container('jenkins-agent') {
-                    orasPull('velagones', env.ARTIFACT_TAG, 'plugins', 'registry.runicrealms.com', 'library')
+                    script {
+                        def manifest = readYaml file: 'plugin-manifest.yaml'
+                        manifest.artifacts.each { artifact ->
+                            def parts = artifact.name.tokenize('/')
+                            def registry = parts[0]
+                            def namespace = parts[1]
+                            def repo = parts[2]
+                            def artifactName = parts[3]
+
+                            echo "Pulling ${artifactName} from ${registry}/${namespace}/${repo} with tag ${artifact.newTag}"
+                            orasPull(artifactName, artifact.newTag, repo, registry, namespace)
+                        }
+                    }
                 }
             }
         }
