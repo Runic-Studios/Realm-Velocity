@@ -66,7 +66,7 @@ pipeline {
         stage('Update Deployment') {
             steps {
                 container('jenkins-agent') {
-                    updateDeployment('dev', IMAGE_NAME, env.GIT_COMMIT.take(7), "registry.runicrealms.com", "build")
+                    updateManifest('dev', 'Realm-Deployment', 'base/kustomization.yaml', IMAGE_NAME, env.GIT_COMMIT.take(7), "registry.runicrealms.com", "build")
                 }
             }
         }
