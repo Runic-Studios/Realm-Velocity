@@ -58,7 +58,7 @@ pipeline {
         stage('Build and Push Docker Image') {
             steps {
                 container('jenkins-agent') {
-                    dockerBuildPush(env.IMAGE_NAME, env.GIT_COMMIT.take(7), env.REGISTRY, env.REGISTRY_PROJECT)
+                    dockerBuildPush("Dockerfile", env.IMAGE_NAME, env.GIT_COMMIT.take(7), env.REGISTRY, env.REGISTRY_PROJECT)
                 }
             }
         }
