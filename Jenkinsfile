@@ -8,14 +8,16 @@ pipeline {
     }
 
     environment {
-        DEPLOYMENT_REPO = 'git@github.com:Runic-Studios/Realm-Deployment.git'
         IMAGE_NAME = 'realm-velocity'
+        PROJECT_NAME = 'Realm Velocity'
+        REGISTRY = 'registry.runicrealms.com'
+        REGISTRY_PROJECT = 'build'
     }
 
     stages {
         stage('Send Discord Notification (Build Start)') {
             steps {
-                discordNotifyStart('Realm Velocity', env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT.take(7))
+                discordNotifyStart(env.PROJECT_NAME, env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT.take(7))
             }
         }
         stage('Determine Environment') {
@@ -56,14 +58,14 @@ pipeline {
         stage('Build and Push Docker Image') {
             steps {
                 container('jenkins-agent') {
-                    dockerBuildPush(IMAGE_NAME, env.GIT_COMMIT.take(7), "registry.runicrealms.com", "build")
+                    dockerBuildPush("Dockerfile", env.IMAGE_NAME, env.GIT_COMMIT.take(7), env.REGISTRY, env.REGISTRY_PROJECT)
                 }
             }
         }
         stage('Update Deployment') {
             steps {
                 container('jenkins-agent') {
-                    updateManifest('dev', 'Realm-Deployment', 'base/kustomization.yaml', IMAGE_NAME, env.GIT_COMMIT.take(7), "registry.runicrealms.com", "build")
+                    updateManifest('dev', 'Realm-Deployment', 'base/kustomization.yaml', env.IMAGE_NAME, env.GIT_COMMIT.take(7), env.REGISTRY, env.REGISTRY_PROJECT)
                 }
             }
         }
@@ -78,12 +80,13 @@ pipeline {
             }
         }
     }
+
     post {
         success {
-            discordNotifySuccess('Realm Velocity', env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT.take(7))
+            discordNotifySuccess(env.PROJECT_NAME, env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT.take(7))
         }
         failure {
-            discordNotifyFail('Realm Velocity', env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT.take(7))
+            discordNotifyFail(env.PROJECT_NAME, env.GIT_URL, env.GIT_BRANCH, env.GIT_COMMIT.take(7))
         }
     }
 }
