@@ -1,10 +1,8 @@
-FROM openjdk:17-jdk
+FROM amazoncorretto:21-alpine
 
 WORKDIR /opt/velocity
 
-COPY velocity.jar /opt/velocity/velocity.jar
-COPY entrypoint.sh /opt/velocity/entrypoint.sh
-COPY plugins/ /opt/velocity/plugins/
+COPY server/ /opt/velocity
 
 RUN chmod +x /opt/velocity/entrypoint.sh
 
