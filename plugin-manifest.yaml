@@ -1,3 +1,4 @@
 artifacts:
   velagones:
+    image: registry.runicrealms.com/library/velagones-velocity
     tag: "d68d945"
