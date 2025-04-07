@@ -8,4 +8,8 @@ for file in /overlay/*; do
   cp "$file" "/opt/velocity/$path"
 done
 
-java -Xms1024M -Xmx1024M -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:MaxInlineLevel=15 -jar velocity.jar
+exec java -Xms1024M -Xmx1024M -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:MaxInlineLevel=15 -jar velocity.jar &
+pid=$!
+# Trap the SIGTERM signal and forward it to the main process (15 = SIGTERM)
+trap 'kill -15 $pid; wait $pid' SIGTERM
+wait $pid
