@@ -5,7 +5,7 @@ WORKDIR /opt/velocity
 COPY server/ /opt/velocity
 
 RUN chmod +x /opt/velocity/palimpsest &&  \
-    chmod +x /opt/velocity/entrypoint.sh \
+    chmod +x /opt/velocity/entrypoint.sh
 
 EXPOSE 25565
 
