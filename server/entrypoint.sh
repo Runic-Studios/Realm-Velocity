@@ -20,7 +20,7 @@ inflate() {
 inflate /overlays/base /inflated/base
 inflate /overlays/env /inflated/env
 
-# Inject the configuration files from config volume into paper
+# Inject the configuration files from config volume into velocity
 ./palimpsest -o /opt/velocity -o /inflated/base -o /inflated/env -t /opt/velocity
 
 exec java -Xms1024M -Xmx1024M -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:MaxInlineLevel=15 -jar velocity.jar &
