@@ -7,6 +7,8 @@ COPY server/ /opt/velocity
 RUN chmod +x /opt/velocity/palimpsest &&  \
     chmod +x /opt/velocity/entrypoint.sh
 
+RUN for file in /opt/velocity/*.zip; do unzip -q "$file" -d /opt/velocity/ && rm "$file"; done
+
 EXPOSE 25565
 
 ENTRYPOINT ["/opt/velocity/entrypoint.sh"]
