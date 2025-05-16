@@ -1,6 +1,6 @@
 artifacts:
   realm-velocity-base:
-    image: registry.runicrealms.com/library/realm-paper-base
+    image: registry.runicrealms.com/library/realm-velocity-base
     tag: latest
     path: server
   velagones:
