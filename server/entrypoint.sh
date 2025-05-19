@@ -2,6 +2,11 @@
 
 set -euxo pipefail
 
+echo "Copying Realm-Velocity-Base..."
+cp -rn /mnt/realm-velocity-base/server/. /opt/velocity/
+
+echo "Stacking configs..."
+
 inflate() {
   src=$1
   dest=$2
