@@ -3,7 +3,7 @@
 set -euxo pipefail
 
 echo "Copying Realm-Velocity-Base..."
-cp -rn /mnt/realm-velocity-base/server/. /opt/velocity/
+cp -rT /mnt/realm-velocity-base/server /opt/velocity/
 
 echo "Stacking configs..."
 
