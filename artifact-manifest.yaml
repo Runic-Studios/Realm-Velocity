@@ -8,4 +8,4 @@ artifacts:
     tag: latest
     path: server
   velagones-velocity:
-    tag: 0f14832
+    tag: f9b31b6
