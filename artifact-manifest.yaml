@@ -7,3 +7,5 @@ artifacts:
     image: registry.runicrealms.com/library/palimpsest
     tag: latest
     path: server
+  velagones-velocity:
+    tag: 0f14832
