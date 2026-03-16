@@ -3,7 +3,7 @@
 pipeline {
     agent {
         kubernetes {
-            yaml jenkinsAgent("registry.runicrealms.com")
+            yaml jenkinsAgent(['agent-base': 'registry.runicrealms.com/jenkins/agent-base:latest'])
         }
     }
 
@@ -37,19 +37,23 @@ pipeline {
                 }
             }
         }
-        stage('Pull Plugin Artifacts') {
+        stage('Pull External Artifacts') {
             steps {
-                container('jenkins-agent') {
+                container('agent-base') {
                     script {
-                        def manifest = readYaml file: 'plugin-manifest.yaml'
-                        manifest.artifacts.each { artifact ->
-                            def parts = artifact.name.tokenize('/')
+                        def manifest = readYaml file: 'artifact-manifest.yaml'
+                        manifest.artifacts.each { key, data ->
+                            def image = data.image
+                            def tag = data.tag
+                            def path = data.path
+
+                            def parts = image.tokenize('/')
                             def registry = parts[0]
                             def registryProject = parts[1]
                             def artifactName = parts[2]
 
-                            echo "Pulling ${artifactName} from ${registry}/${registryProject} with tag ${artifact.newTag}"
-                            orasPull(artifactName, artifact.newTag, 'plugins', registry, registryProject)
+                            echo "Pulling ${artifactName} from ${registry}/${registryProject} with tag ${tag} to ${path}"
+                            orasPull(artifactName, tag, path, registry, registryProject)
                         }
                     }
                 }
@@ -57,15 +61,15 @@ pipeline {
         }
         stage('Build and Push Docker Image') {
             steps {
-                container('jenkins-agent') {
+                container('agent-base') {
                     dockerBuildPush("Dockerfile", env.IMAGE_NAME, env.GIT_COMMIT.take(7), env.REGISTRY, env.REGISTRY_PROJECT)
                 }
             }
         }
         stage('Update Deployment') {
             steps {
-                container('jenkins-agent') {
-                    updateManifest('dev', 'Realm-Deployment', 'base/kustomization.yaml', env.IMAGE_NAME, env.GIT_COMMIT.take(7), env.REGISTRY, env.REGISTRY_PROJECT)
+                container('agent-base') {
+                    updateManifest('dev', 'Realm-Deployment', 'values.yaml', env.IMAGE_NAME, env.GIT_COMMIT.take(7), 'velocity.deployment.tag')
                 }
             }
         }
@@ -74,7 +78,7 @@ pipeline {
                 expression { return env.RUN_MAIN_DEPLOY == 'true' }
             }
             steps {
-                container('jenkins-agent') {
+                container('agent-base') {
                     createPR('Realm-Velocity', 'Realm-Deployment', 'dev', 'main')
                 }
             }
