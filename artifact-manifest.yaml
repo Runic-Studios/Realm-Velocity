@@ -5,5 +5,5 @@ artifacts:
     path: server/plugins
   palimpsest:
     image: registry.runicrealms.com/library/palimpsest
-    tag: "1157357"
+    tag: "a4cb9bf"
     path: server
