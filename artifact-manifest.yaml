@@ -1,4 +1,8 @@
 artifacts:
+  nexus:
+    image: registry.runicrealms.com/library/nexus-velocity
+    tag: "0000000"
+    path: server/plugins
   velagones:
     image: registry.runicrealms.com/library/velagones-velocity
     tag: "595cf47"
