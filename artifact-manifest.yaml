@@ -1,7 +1,11 @@
 artifacts:
+  nexus:
+    image: registry.runicrealms.com/library/nexus-velocity
+    tag: "2956713"
+    path: server/plugins
   velagones:
     image: registry.runicrealms.com/library/velagones-velocity
-    tag: "7ae28e7"
+    tag: "595cf47"
     path: server/plugins
   palimpsest:
     image: registry.runicrealms.com/library/palimpsest
