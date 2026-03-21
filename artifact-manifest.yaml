@@ -5,7 +5,7 @@ artifacts:
     path: server/plugins
   velagones:
     image: registry.runicrealms.com/library/velagones-velocity
-    tag: "1a1322b"
+    tag: "d737d14"
     path: server/plugins
   palimpsest:
     image: registry.runicrealms.com/library/palimpsest
